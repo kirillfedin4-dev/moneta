@@ -1,0 +1,427 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+@custom-variant dark (&:is(.dark *));
+
+:root {
+  --radius: 0;
+
+  /* Палитра */
+  --tag-primary: #000000;      /* Оранжевый — пастельный */
+  --tag-secondary: #000000;    /* Жёлтый — пастельный */
+  --tag-destructive: #000000;  /* Красный — пастельный */
+  --tag-accent: #000000;       /* Синий — пастельный */
+
+  /* Тёмные цвета для текста и обводки */
+  --tag-primary-dark: #B84A00;
+  --tag-secondary-dark: #8A7300;
+  --tag-destructive-dark: #B8001A;
+  --tag-accent-dark: #0066B8;
+
+  /* Фон сайта — как страница старого каталога */
+  --site-bg: #F2EBDD;              /* тёплая бумага */
+  --site-card: #FBF7EF;            /* чуть светлее бумаги */
+  --site-frame: #E5DAC4;           /* подложка ПОД фото (для «рамки») */
+  --site-border: #D6C9AE;
+  --site-text: #0A0A0A;
+  --site-muted: rgba(10, 10, 10, 0.68);
+  --site-line: rgba(10, 10, 10, 0.14);
+
+  /* Золото */
+  --gold: #9C7326;
+  --gold-soft: rgba(156, 115, 38, 0.12);
+
+  /* shadcn */
+  --background: #F2EBDD;
+  --foreground: #0A0A0A;
+  --card: #FBF7EF;
+  --card-foreground: #0A0A0A;
+  --primary: #FF6C0A;
+  --primary-foreground: #0A0A0A;
+  --secondary: #FFE70A;
+  --muted: #EDE4D3;
+  --muted-foreground: #0A0A0A;
+  --accent: #0A9DFF;
+  --destructive: #FF0A23;
+  --border: #D6C9AE;
+  --input: #FFFFFF;
+  --ring: #9C7326;
+}
+
+@theme inline {
+  --font-sans: 'Inter', system-ui, sans-serif;
+  --font-serif: 'Playfair Display', Georgia, serif;
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+
+  html, body {
+    font-family: 'Inter', system-ui, sans-serif;
+    font-size: 16px;
+    font-weight: 500;
+    line-height: 1.5;
+    background: var(--site-bg);
+    color: var(--site-text);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  /* Текстура бумаги — мелкая сетка точек */
+  body {
+    background-image:
+      radial-gradient(circle at 1px 1px, rgba(156, 115, 38, 0.07) 1px, transparent 0);
+    background-size: 24px 24px;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-weight: 700;
+    letter-spacing: 0;
+    color: var(--site-text);
+    line-height: 1.15;
+  }
+
+  /* Утилита для мелких подписей */
+  .label {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--site-muted);
+  }
+
+  .tabular-nums {
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: 'tnum';
+  }
+}
+
+#root {
+  width: 100%;
+  min-height: 100svh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* 📷 Универсальная «фотокоробка» для UGC */
+.photo-frame {
+  position: relative;
+  background: var(--site-frame);
+  overflow: hidden;
+}
+
+/* Внутренняя тень — «утопляет» любое фото в рамку */
+.photo-frame img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  box-shadow:
+    inset 0 0 40px rgba(0, 0, 0, 0.25),
+    inset 0 0 0 1px rgba(0, 0, 0, 0.05);
+}
+
+/* Виньетка снизу — фокусирует взгляд на центре */
+.photo-frame::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0) 55%,
+    rgba(0, 0, 0, 0.18) 100%
+  );
+}
+/* ========================================
+   Слайдер (для ImageCropper, фильтров)
+   ======================================== */
+.slider {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 2px;
+  background: var(--site-border);
+  outline: none;
+  cursor: pointer;
+  border-radius: 0;
+}
+
+/* Дорожка для WebKit (Chrome, Safari, Edge) */
+.slider::-webkit-slider-runnable-track {
+  height: 2px;
+  background: var(--site-border);
+  border: none;
+}
+
+/* Ползунок для WebKit */
+.slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  background: var(--site-text);
+  border: 2px solid var(--site-card);
+  border-radius: 50%;
+  margin-top: -9px; /* (высота ползунка / 2) - (толщина дорожки / 2) = 10 - 1 */
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  box-shadow: 0 0 0 1px var(--site-text);
+}
+
+.slider::-webkit-slider-thumb:hover {
+  transform: scale(1.15);
+  background: var(--gold);
+  box-shadow: 0 0 0 1px var(--gold);
+}
+
+/* Firefox */
+.slider::-moz-range-track {
+  height: 2px;
+  background: var(--site-border);
+  border: none;
+}
+
+.slider::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  background: var(--site-text);
+  border: 2px solid var(--site-card);
+  border-radius: 50%;
+  cursor: pointer;
+  transition: transform 0.15s ease, background 0.15s ease;
+  box-shadow: 0 0 0 1px var(--site-text);
+}
+
+.slider::-moz-range-thumb:hover {
+  transform: scale(1.15);
+  background: var(--gold);
+  box-shadow: 0 0 0 1px var(--gold);
+}
+
+/* Фокус — золотая обводка (для доступности) */
+.slider:focus::-webkit-slider-thumb {
+  box-shadow: 0 0 0 3px var(--gold-soft), 0 0 0 1px var(--gold);
+}
+.slider:focus::-moz-range-thumb {
+  box-shadow: 0 0 0 3px var(--gold-soft), 0 0 0 1px var(--gold);
+}
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+/* ═══════════════════════════════════════════
+   🎬 Анимации
+   ═══════════════════════════════════════════ */
+
+/* Плавный transition на всё интерактивное */
+a, button, input, select, textarea {
+  transition:
+    color 200ms cubic-bezier(0.22, 1, 0.36, 1),
+    background-color 200ms cubic-bezier(0.22, 1, 0.36, 1),
+    border-color 200ms cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 300ms cubic-bezier(0.22, 1, 0.36, 1),
+    transform 300ms cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 200ms ease;
+}
+
+/* Появление карточек при скролле */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.reveal {
+  opacity: 0;
+  transform: translateY(24px);
+}
+
+.reveal.visible {
+  animation: fadeInUp 0.7s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+/* Shimmer-эффект на золотых блоках */
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.gold-shimmer {
+  background: linear-gradient(
+    90deg,
+    var(--gold-soft) 0%,
+    rgba(184, 137, 47, 0.3) 50%,
+    var(--gold-soft) 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 3s ease-in-out infinite;
+}
+
+/* Мягкая пульсация для срочных элементов */
+@keyframes softPulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.85;
+    transform: scale(1.02);
+  }
+}
+
+.soft-pulse {
+  animation: softPulse 2s ease-in-out infinite;
+}
+
+/* Плавное подчёркивание ссылок */
+.underline-grow {
+  position: relative;
+}
+.underline-grow::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 0;
+  height: 1px;
+  background: currentColor;
+  transition: width 300ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+.underline-grow:hover::after {
+  width: 100%;
+}
+
+/* Slide-in слева для новых ставок */
+@keyframes slideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.feed-new {
+  animation: slideInLeft 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* Плавное "перекатывание" цифр цены */
+@keyframes priceFlip {
+  0% {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.price-flip {
+  display: inline-block;
+  animation: priceFlip 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* Hover-эффект для карточек: подъём + тень */
+.card-hover {
+  transition:
+    transform 500ms cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 500ms cubic-bezier(0.22, 1, 0.36, 1),
+    border-color 300ms ease;
+  will-change: transform, box-shadow;
+}
+
+.card-hover:hover {
+  transform: translateY(-6px);
+  box-shadow:
+    0 24px 48px -20px rgba(0, 0, 0, 0.18),
+    0 8px 16px -8px rgba(0, 0, 0, 0.08);
+}
+
+/* Плавный zoom фото в карточке */
+.card-hover:hover img {
+  transform: scale(1.06);
+}
+
+.card-hover img {
+  transition: transform 0.8s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* Уважаем настройку "уменьшить движение" */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+/* ═══════════════════════════════════════════
+   Диалоги и hero-анимации
+   ═══════════════════════════════════════════ */
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes dialogPop {
+  0% {
+    opacity: 0;
+    transform: scale(0.95) translateY(10px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes lineGrow {
+  from { width: 0; }
+  to { width: 64px; }
+}
+
+@keyframes heroFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
